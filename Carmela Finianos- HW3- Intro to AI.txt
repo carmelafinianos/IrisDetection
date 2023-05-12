@@ -1,0 +1,187 @@
+# import libraries
+from matplotlib import pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import load_iris
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+from sklearn import tree
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+import plotly.graph_objects as go
+
+# load the iris sample dataset from Scikit-learn library
+iris = load_iris()
+
+# create 2 lists
+score = []
+name = []
+
+# Organize data:
+label_names = iris['target_names']
+labels = iris['target']
+feature_names = iris['feature_names']
+features = iris['data']
+
+# Print labels:
+print("Class Labels: " + str(label_names))
+print("Features Labels: " + str(feature_names))
+print("")
+
+# plot the sepal data:
+plt.scatter(features[:, 0], features[:, 1], c=labels, cmap=plt.cm.Set1, edgecolor="k")
+plt.xlabel("Sepal length")
+plt.ylabel("Sepal width")
+plt.xticks(())
+plt.yticks(())
+plt.show()
+
+# plot the petal data:
+plt.scatter(features[:, 2], features[:, 3], c=labels, cmap=plt.cm.Set1, edgecolor="k")
+plt.xlabel("Petal length")
+plt.ylabel("Petal width")
+plt.xticks(())
+plt.yticks(())
+plt.show()
+
+# split data into training and testing 80/20 ratio
+X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.20)
+
+# SVC Linear Test
+lsvc = SVC(kernel='linear')
+lsvc.fit(X_train, y_train)
+y_pred = lsvc.predict(X_test)
+accuracy0 = accuracy_score(y_test, y_pred)
+print("")
+score.append(accuracy0)
+name.append("Linear SVC")
+
+# SVC polynomial Test
+psvc = SVC(kernel='poly', degree=8)
+psvc.fit(X_train, y_train)
+y_pred1 = psvc.predict(X_test)
+accuracy1 = accuracy_score(y_test, y_pred1)
+score.append(accuracy1)
+name.append("Polynomial SVC")
+
+# SVC Gaussian Test
+gsvc = SVC(kernel='rbf')
+gsvc.fit(X_train, y_train)
+y_pred2 = gsvc.predict(X_test)
+accuracy2 = accuracy_score(y_test, y_pred2)
+score.append(accuracy2)
+name.append("Gaussian SVC")
+
+# KNN
+knclass = KNeighborsClassifier(n_neighbors=3)
+knclass.fit(X_train, y_train)
+y_pred3 = knclass.predict(X_test)
+accuracy3 = accuracy_score(y_test, y_pred3)
+
+score.append(accuracy3)
+name.append("KNN")
+
+
+# decisiontree 2 nodes
+clf2 = DecisionTreeClassifier(max_leaf_nodes=2, random_state=0)
+clf2.fit(X_train, y_train)
+y_pred4 = clf2.predict(X_test)
+accuracy4 = accuracy_score(y_test, y_pred4)
+
+score.append(accuracy4)
+name.append("Decision Tree of 2 nodes")
+tree.plot_tree(clf2)
+plt.show()
+
+# train a model using decision tree algorithm of 3 nodes
+clf = DecisionTreeClassifier(max_leaf_nodes=3, random_state=0)
+clf.fit(X_train, y_train)
+tree.plot_tree(clf)
+plt.show()
+predict_test = clf.predict(X_test)
+accuracy = accuracy_score(y_test, predict_test)
+score.append(accuracy)
+name.append("Decision Tree of 3 nodes")
+
+# decisiontree 4 nodes
+clf4 = DecisionTreeClassifier(max_leaf_nodes=4, random_state=0)
+clf4.fit(X_train, y_train)
+y_pred5 = clf4.predict(X_test)
+accuracy5 = accuracy_score(y_test, y_pred5)
+score.append(accuracy5)
+name.append("Decision Tree of 4 nodes")
+tree.plot_tree(clf4)
+plt.show()
+
+# decisiontree of 5 nodes
+clf5 = DecisionTreeClassifier(max_leaf_nodes=5, random_state=0)
+clf5.fit(X_train, y_train)
+y_pred6 = clf5.predict(X_test)
+accuracy6 = accuracy_score(y_test, y_pred6)
+score.append(accuracy6)
+name.append("Decision Tree of 5 nodes")
+tree.plot_tree(clf5)
+plt.show()
+
+# Create a tuple of the score and name
+list_of_tuples = list(zip(name, score))
+
+# Sort the Classification Models in increasing order of Accuracy
+sorted = sorted(
+    list_of_tuples,
+    key=lambda t: t[1]
+)
+
+# Split the tuple into 2 lists for table and graph
+l1, l2 = zip(*sorted)
+
+
+#represent accuracy in a table to compare Results
+fig = go.Figure(data=[go.Table(
+    header=dict(values=['Classification Types in Increasing order of Accuracy', 'Accuracy Scores'],
+                line_color='purple',
+                fill_color='thistle',
+                align='left'),
+    cells=dict(values=[l1, # 1st column
+                       l2], # 2nd column
+               line_color='purple',
+               fill_color='plum',
+               align='left'))
+])
+fig.update_layout(width=1000, height=700)
+fig.show()
+
+#Decreasing digits of score
+k=[]
+for j in l2:
+    p = float("{:.3f}".format(j))
+    k.append(p)
+
+# Create bar graph to represent the class models with their accuracy rate
+fig, ax = plt.subplots(figsize=(20,4))
+bars=ax.bar(l1, l2,color='mediumorchid')
+for bar in bars:
+  height = bar.get_height()
+  h1=float("{:.3f}".format(height))
+  label_x_pos = bar.get_x() + bar.get_width() / 2
+  ax.text(label_x_pos, height, s=f'{h1}', ha='center',
+  va='bottom')
+plt.xticks(fontsize=10,rotation=90)
+plt.title('Class Model Accuracy')
+plt.xlabel('Classification Model Type')
+plt.ylabel('Accuracy Score')
+plt.tight_layout()
+plt.show()
+
+# predict a classification based on the user input
+inputs = []
+print("Predict the class of the Iris flower - Enter its specifications:")
+inputs.append(float(input("Enter Sepal Length (cm):")))
+inputs.append(float(input("Enter Sepal Width (cm):")))
+inputs.append(float(input("Enter Petal Length (cm):")))
+inputs.append(float(input("Enter Petal Width (cm):")))
+
+input_feature = []
+input_feature.append(inputs)
+
+predict_class = clf.predict(input_feature)
+print("Class of this Iris flower is: " + str(label_names[predict_class]))
